@@ -11,6 +11,8 @@ from app.domains.task import models, schemas
 from app.domains.auth.security import get_current_user
 from app.domains.auth.models import User
 from app.domains.TodayFocus.today_focus.service import TodayFocusServiceImpl
+from app.infrastructure.chain.chain_manager import ChainManager
+from app.infrastructure.chain.service import ChainServiceImpl
 
 router = APIRouter()
 
@@ -22,6 +24,14 @@ def _get_today_focus_service() -> TodayFocusServiceImpl:
     if _today_focus_service is None:
         _today_focus_service = TodayFocusServiceImpl()
     return _today_focus_service
+
+_chain_service: ChainServiceImpl | None = None
+
+def _get_chain_service() -> ChainServiceImpl:
+    global _chain_service
+    if _chain_service is None:
+        _chain_service = ChainServiceImpl()
+    return _chain_service
 
 def get_db():
     db = get_session_factory()()
@@ -124,7 +134,7 @@ def create_task(
         _get_today_focus_service().record_action(task_data.session_id, now_utc)
     return new_task
 
-@router.patch("/{task_id}", response_model=schemas.TaskResponse)
+@router.patch("/{task_id}", response_model=schemas.TaskUpdateResponse)
 def update_task(
     task_id: int,
     task_data: schemas.TaskUpdate,
@@ -153,7 +163,25 @@ def update_task(
     if task_data.session_id:
         now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
         _get_today_focus_service().record_action(task_data.session_id, now_utc)
-    return task
+
+    # [PRO-B-44] task_complete 시 서버 기반 집계: Raw Event + ChainLength·일별 집계 원자적 갱신, 멱등성 보장
+    chain_length: int | None = None
+    is_long_term_chain: bool | None = None
+    if task_data.status == models.TaskStatus.COMPLETED:
+        now_utc_chain = datetime.now(timezone.utc)
+        completion_result = ChainManager.record_completion(
+            task_id=task_id,
+            user_id=current_user.id,
+            completed_at=now_utc_chain,
+            idempotency_key=f"task:{task_id}",
+        )
+        chain_length = completion_result.chain_length
+        is_long_term_chain = completion_result.is_long_term_chain
+
+    response = schemas.TaskUpdateResponse.model_validate(task)
+    response.chain_length = chain_length
+    response.is_long_term_chain = is_long_term_chain
+    return response
 
 @router.delete("/{task_id}")
 def delete_task(

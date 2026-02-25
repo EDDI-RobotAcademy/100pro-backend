@@ -25,6 +25,28 @@ class TaskResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class TaskUpdateResponse(BaseModel):
+    """
+    [PRO-B-42] PATCH /tasks/{id} 응답 — 완료 시 chain_length 포함으로 0.5초 이내 UI 반영 지원.
+    낙관적 업데이트 후 서버 응답으로 동일 값 수신 시 정합성 확보.
+    """
+
+    id: int
+    title: str
+    description: Optional[str] = None
+    status: TaskStatus
+    user_id: int
+    due_date: datetime
+    is_archived: bool = False
+    created_at: datetime
+    updated_at: datetime
+    # task_complete 시 서버가 갱신한 ChainLength — 한 번의 왕복으로 캘린더 UI 동기화
+    chain_length: Optional[int] = None
+    is_long_term_chain: Optional[bool] = None
+
+    model_config = {"from_attributes": True}
+
+
 class CumulativeMissCountResponse(BaseModel):
     """사용자별 누적 task_miss 카운트 응답."""
 

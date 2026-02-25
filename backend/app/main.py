@@ -72,6 +72,7 @@ from app.infrastructure.task_params import router as task_params_router  # noqa:
 from app.infrastructure.experiment_config import router as experiment_config_router  # noqa: E402
 from app.infrastructure.trigger_config import router as trigger_config_router  # noqa: E402 [PRO-B-25]
 from app.domains.TodayFocus.today_focus import router as today_focus_router  # noqa: E402
+from app.infrastructure.chain import router as chain_router  # noqa: E402 [PRO-B-41]
 
 app.include_router(
     auth_router,
@@ -130,4 +131,10 @@ app.include_router(  # [PRO-B-25]
     trigger_config_router,
     prefix="/trigger-config",
     tags=["trigger-config [PRO-B-25]"],
+)
+
+app.include_router(
+    chain_router,
+    prefix="/chain",
+    tags=["Chain [PRO-B-41]"],
 )

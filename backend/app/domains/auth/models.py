@@ -13,3 +13,7 @@ class User(Base):
 
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    # [PRO-B-41][PRO-B-42] ChainLength 및 성취 지표: 연속 달성 일수, 마지막 완료 시점 (서버 DB 영속성·재진입 후 유지)
+    current_chain_length = Column(Integer, nullable=False, default=0)
+    last_task_completed_at = Column(DateTime, nullable=True)

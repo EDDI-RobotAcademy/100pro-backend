@@ -49,4 +49,5 @@ def init_db() -> None:
     import app.infrastructure.task_params.models  # noqa: F401
     import app.infrastructure.experiment_config.config  # noqa: F401
     import app.infrastructure.trigger_config.settings  # noqa: F401
+    import app.infrastructure.chain.models  # noqa: F401 [PRO-B-41]
     Base.metadata.create_all(bind=get_engine())
