@@ -21,3 +21,14 @@ class AppOpenResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ActionRequest(BaseModel):
+    session_id: str
+
+
+class AppCloseRequest(BaseModel):
+    """app_close 이벤트 요청."""
+
+    session_id: str = Field(..., description="세션 식별자")
+    app_close_at: datetime | None = Field(None, description="앱 종료 시각. 없으면 서버 현재 시각 사용.")

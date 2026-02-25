@@ -98,8 +98,8 @@ app.include_router(
 )
 app.include_router(
     today_focus_router,
-    prefix="/task-strategy",
-    tags=["task-strategy [PRO-B-21]"],
+    prefix="",
+    tags=["TodayFocus [PRO-B-28]"],
 )
 
 app.include_router(

@@ -10,8 +10,18 @@ from app.core.database import get_session_factory
 from app.domains.task import models, schemas
 from app.domains.auth.security import get_current_user
 from app.domains.auth.models import User
+from app.domains.TodayFocus.today_focus.service import TodayFocusServiceImpl
 
 router = APIRouter()
+
+_today_focus_service: TodayFocusServiceImpl | None = None
+
+
+def _get_today_focus_service() -> TodayFocusServiceImpl:
+    global _today_focus_service
+    if _today_focus_service is None:
+        _today_focus_service = TodayFocusServiceImpl()
+    return _today_focus_service
 
 def get_db():
     db = get_session_factory()()
@@ -109,6 +119,9 @@ def create_task(
     db.add(new_task)
     db.commit()
     db.refresh(new_task)
+    if task_data.session_id:
+        now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+        _get_today_focus_service().record_action(task_data.session_id, now_utc)
     return new_task
 
 @router.patch("/{task_id}", response_model=schemas.TaskResponse)
@@ -137,6 +150,9 @@ def update_task(
 
     db.commit()
     db.refresh(task)
+    if task_data.session_id:
+        now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+        _get_today_focus_service().record_action(task_data.session_id, now_utc)
     return task
 
 @router.delete("/{task_id}")

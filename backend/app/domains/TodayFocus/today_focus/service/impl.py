@@ -27,3 +27,11 @@ class TodayFocusServiceImpl(TodayFocusServiceProtocol):
     def record_app_open(self, user_id: str, app_open_at: datetime) -> SessionLog:
         """[PM-TF-INF-01 STEP 2] app_open 이벤트 시 세션 생성. experiment_group은 "A"로 저장."""
         return self._session_log_repository.create_session(user_id, app_open_at)
+
+    def record_action(self, session_id: str, action_at: datetime) -> None:
+        """[PM-TF-INF-02 STEP 3] 액션 시 first_action_at(첫 액션만), reentry_latency_ms(첫 액션만), last_action_at 갱신."""
+        self._session_log_repository.update_on_action(session_id, action_at)
+
+    def record_app_close(self, session_id: str, app_close_at: datetime) -> None:
+        """[PM-TF-INF-03 STEP 4] app_close 시 app_close_at, pre_exit_inaction_ms, is_high_risk_exit 기록."""
+        self._session_log_repository.update_on_app_close(session_id, app_close_at)
