@@ -43,6 +43,7 @@ def init_db() -> None:
     """모든 모델 테이블을 생성한다. 앱 시작 시 1회 호출."""
     import app.domains.auth.models  # noqa: F401
     import app.domains.task.models  # noqa: F401
+    import app.domains.TodayFocus.today_focus.session_log  # noqa: F401 [PM-TF-INF-01]
     import app.infrastructure.task_archive.models  # noqa: F401
     import app.infrastructure.task_tracking.models  # noqa: F401
     import app.infrastructure.task_params.models  # noqa: F401

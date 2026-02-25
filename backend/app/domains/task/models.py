@@ -33,7 +33,13 @@ class Task(Base):
         default=TaskStatus.PENDING,
         index=True,
     )
-    user_id = Column(String(64), nullable=False, index=True)
+    from sqlalchemy import ForeignKey
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     due_date = Column(DateTime, nullable=False, index=True)
     is_archived = Column(Boolean, nullable=False, default=False, index=True)  # [PRO-B-21]
     created_at = Column(DateTime, nullable=False, server_default=func.now())
